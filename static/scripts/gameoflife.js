@@ -3,46 +3,81 @@ let columns;
 let rows;
 let board;
 let next;
+let osc;
+let freqBoard;
+let playing = false;
 
 function setup() {
-  createCanvas(720, 400);
+  createCanvas(280, 480);  // Match the dimensions from your example
+  frameRate(10);  // Slow down the animation
   w = 20;
+  
   // Calculate columns and rows
   columns = floor(width / w);
   rows = floor(height / w);
-  // Wacky way to make a 2D array is JS
-  board = new Array(columns);
-  for (let i = 0; i < columns; i++) {
-    board[i] = new Array(rows);
-  }
-  // Going to use multiple 2D arrays and swap them
-  next = new Array(columns);
-  for (i = 0; i < columns; i++) {
-    next[i] = new Array(rows);
-  }
+  
+  // Initialize the oscillator
+  osc = new p5.Oscillator('sine');
+  
+  // Initialize boards
+  board = make2DArray(columns, rows);
+  next = make2DArray(columns, rows);
+  freqBoard = make2DArray(columns, rows);
+  
+  // Initialize frequency board with your note mappings
+  initializeFreqBoard();
+  
   init();
 }
 
 function draw() {
   background(255);
   generate();
-  for ( let i = 0; i < columns;i++) {
-    for ( let j = 0; j < rows;j++) {
-      if ((board[i][j] == 1)) fill(0);
-      else fill(255);
+  
+  // Count active cells and their positions for sound
+  let activeCells = [];
+  for (let i = 0; i < columns; i++) {
+    for (let j = 0; j < rows; j++) {
+      if (board[i][j] == 1) {
+        fill(0);
+        activeCells.push({x: i, y: j});
+      } else {
+        fill(255);
+      }
       stroke(0);
       rect(i * w, j * w, w-1, w-1);
     }
   }
-
+  
+  // Generate sound based on active cells
+  if (activeCells.length > 0 && playing) {
+    // Use the first active cell for frequency
+    let freq = freqBoard[activeCells[0].x][activeCells[0].y] || 440;
+    osc.freq(freq, 0.1);
+    // Use number of active cells for amplitude
+    let amp = map(activeCells.length, 0, (columns * rows) / 4, 0, 0.5);
+    osc.amp(amp, 0.1);
+  }
 }
 
-// reset board when mouse is pressed
 function mousePressed() {
+  // Start audio on first click
+  if (!playing) {
+    osc.start();
+    playing = true;
+  }
   init();
 }
 
-// Fill board randomly
+function make2DArray(cols, rows) {
+  let arr = new Array(cols);
+  for (let i = 0; i < cols; i++) {
+    arr[i] = new Array(rows);
+  }
+  return arr;
+}
+
+// reset board when mouse is pressed
 function init() {
   for (let i = 0; i < columns; i++) {
     for (let j = 0; j < rows; j++) {
@@ -84,5 +119,16 @@ function generate() {
   let temp = board;
   board = next;
   next = temp;
+}
+
+function initializeFreqBoard() {
+  // Initialize with your frequency mappings
+  // This is a simplified version - you can add all your mappings
+  for (let i = 0; i < columns; i++) {
+    for (let j = 0; j < rows; j++) {
+      // Map position to frequency using your note table
+      freqBoard[i][j] = 220 * pow(2, floor(map(i + j, 0, columns + rows, 0, 12)) / 12);
+    }
+  }
 }
 

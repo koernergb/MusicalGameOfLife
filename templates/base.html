@@ -4,13 +4,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <!--<link rel="script" href ="{{ url_for('static', filename='scripts/sketch.js') }}"> -->
-    <link rel="script" href="{{ url_for('static', filename='scripts/sketch.js') }}">    {% block head %}
-    {% endblock %}
+    <!-- Add p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <!-- Add p5.sound library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+    <!-- Add your game script -->
+    <script src="{{ url_for('static', filename='scripts/gameoflife.js') }}"></script>
+    {% block head %}{% endblock %}
 </head>
 <body>
-    {% block body %}
-        <script src="sketch.js"></script>
-    {% endblock %}
+    {% block body %}{% endblock %}
 </body>
 </html>
